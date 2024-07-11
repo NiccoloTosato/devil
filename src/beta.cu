@@ -1,6 +1,8 @@
 #include<cuda.h>
 #include<stdio.h>
 #include <Eigen/Dense>
+#include <cuda_runtime.h>
+#include <cublas_v2.h>
 
 #define  BLOCK_DIM_X 32
 #define  BLOCK_DIM_Y 32
@@ -14,6 +16,14 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
       if (abort) exit(code);
    }
 }
+
+#define cudaCheckError() {                                          \
+    cudaError_t e=cudaGetLastError();				    \
+    if(e!=cudaSuccess) {						\
+      printf("Cuda failure %s:%d: '%s'\n",__FILE__,__LINE__,cudaGetErrorString(e)); \
+      exit(0);								\
+    }									\
+  }
 
 
 __global__ void printArray(float* array,int size) {
@@ -42,10 +52,28 @@ __global__ void initIdentityGPU(float *Matrix, int rows, int cols,float alpha) {
     }
 }
 
+__global__ void expGPU(float *vector) {
+  int x = blockDim.x*blockIdx.x + threadIdx.x;
+  vector[x]=exp(vector[x]);
+}
+
+//    mu_g = (k + y.array()) / (1 + k * w_q.array());
+__global__ void line30(float *mu_g,float *y,float *w_q, float k) {
+  int idx = blockDim.x*blockIdx.x + threadIdx.x;
+  mu_g[idx] = (k+y[idx])/(1+k *w_q[idx]);
+}
+
+
+__global__ void diag(float *matrix,float *array1, float* array2,int n) {
+  int idx = blockDim.x*blockIdx.x + threadIdx.x;
+  matrix[idx*n+idx] = array1[idx]*array2[idx];
+}
+
+
 int main() {
 
-  int cols=10;
-  int rows=10;
+  int cols=32;
+  int rows=32;
 
 
   //block stuff, to be redefined ! 
@@ -109,11 +137,70 @@ int main() {
   float* off_device;
   CUDA_CHECK(   cudaMalloc((void**)&off_device, off.size() * sizeof(float)) );
   CUDA_CHECK(   cudaMemcpy(off_device, off.data(), off.size() * sizeof(float), cudaMemcpyHostToDevice) );
-  int iter=0;
-  while(iter < 10) {
 
+  cublasHandle_t handle;
+  cublasCreate(&handle);
+  ////////////////////////////////////////
+  //cublas max test !
+  /*
+  float value = 99.0;
+  int i=3;
+  cudaMemcpy(off_device + i, &value, sizeof(float), cudaMemcpyHostToDevice);
+
+  cublasStatus_t status;
+  int result=-99;
+  status=  cublasIsamax(handle, off.size(),
+	       off_device,1,&result);
+  printf("Max index %d\n",result);
+
+  if (status != CUBLAS_STATUS_SUCCESS) {
+    printf("cuBLAS error\n");
+} else {
+    printf("cuBLAS function executed successfully\n");
+}
+  #ifdef DEBUG
+  printf("off_device\n");
+  printArray<<<1,1,1>>>(off_device,off.size());
+  fflush(stdout);
+  cudaDeviceSynchronize();
+  #endif
+  */
+  ///////////////////////////////////////
+  int iter=0;
+
+    while(iter < 10) {
+    //line 29
+    //w_q = (-X * mu_beta - off)
+    // Perform the operation y := alpha*A*x + beta*y
+    float alpha=-1.0;
+    float beta=1.0;
+    cublasSgemv(handle, CUBLAS_OP_N, rows, cols, &alpha, X_device, cols, mu_beta_device, 1, &beta, w_q_device, 1);
+
+    //w_q = w_q.exp()
+    dim3 threadsPerBlock(32);
+    dim3 numBlocks_array_cols(cols / threadsPerBlock.x);
+    expGPU<<<numBlocks_array_cols,threadsPerBlock, 1>>>(w_q_device);
+    // line 30
+    // mu_g = (k + y.array()) / (1 + k * w_q.array());
+    dim3 numBlocks_array_rows(rows  / threadsPerBlock.x);
+    float k=3.0;
+    line30<<<numBlocks_array_rows, threadsPerBlock>>>(mu_g_device,y_device,w_q_device,k);
+    float* diagonalMatrix;
+    CUDA_CHECK(   cudaMalloc((void**)&diagonalMatrix, cols*cols * sizeof(float)) );
+    //line 31
+    //    Zigma = (X.transpose() * (mu_g.array() * w_q.array()).matrix().asDiagonal() * X).inverse();
+    diag<<<numBlocks_array_rows,threadsPerBlock,1>>>(diagonalMatrix,mu_g_device,w_q_device,rows);
+
+    cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, rows, cols, cols, 1.0, X, cols, diagonalMatrix, cols, 0.0, Zigma_device, cols);
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, rows, cols, cols, 1.0, Zigma_device, cols, X, cols, 0.0, diagonalMatrix, cols);
+
+    float* tmp;
+    tmp=Zigma_device;
+    Zigma_device=diagonalMatrix;
+    diagoanlMatrix=tmp;
+    inverseMatrix(diagonalMatrix,)
+    iter++;
   }
-    //  cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n_col,  n_fix, N , &alpha, buffer_device, n_col, A_device, N, &beta, C_device+offset, N);
     
   CUDA_CHECK( cudaFree(delta_device) );
   CUDA_CHECK( cudaFree(inv_sigma_beta_const_device) );

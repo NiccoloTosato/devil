@@ -25,6 +25,7 @@ List beta_fit(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd mu_beta, Eig
 
   bool converged = 0;
   int iter = 0;
+  std::cout<<"Inside beta_fit";
   while (!converged && iter < max_iter) {
     w_q = (-X * mu_beta - off).array().exp();
     mu_g = (k + y.array()) / (1 + k * w_q.array());
@@ -52,6 +53,7 @@ List beta_fit_group(Eigen::VectorXd y, float mu_beta, Eigen::VectorXd off, float
 
   bool converged = 0;
   int iter = 0;
+  std::cout<<"Inside beta_fit_group";
   while (!converged && iter < max_iter) {
     w_q = (-mu_beta * ones - off).array().exp();
     mu_g = (k + y.array()) / (1 + k * w_q.array());
