@@ -73,6 +73,7 @@ void checkCublasStatus(cublasStatus_t status, const char* functionName) {
         printf("%s failed with error code %d\n", functionName, status);
     }
 }
+
 void inverseMatrix(float *A,float * A_inv, int n) {
   cusolverDnHandle_t cusolverH = NULL;
   cusolverStatus_t cusolver_status = CUSOLVER_STATUS_SUCCESS;
@@ -124,17 +125,9 @@ void inverseMatrix(float *A,float * A_inv, int n) {
     dim3 gridDim(n, n);  
     initIdentityGPU<<<blockDim, gridDim>>>(eye, n, n, 1.0);
     // Solve the system AX = I
-    cusolver_status = cusolverDnSgetrs(
-				       cusolverH,
-				       CUBLAS_OP_N,
-				       n,
-				       n,
-				       d_A,
-				       n,
-				       d_Ipiv,
-				       eye, // This should be the identity matrix
-				       n,
-				       d_info);
+    cusolver_status = cusolverDnSgetrs(cusolverH,CUBLAS_OP_N,n,n,d_A,
+				       n, d_Ipiv, eye, // This should be the identity matrix
+				       n,  d_info);
     //printf("eye  matrix\n");
     //printMatrixDevice<<<1,1>>>(eye,n);
     //fflush(stdout);

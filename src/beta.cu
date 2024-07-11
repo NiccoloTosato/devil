@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
+#include <cusolverDn.h>
 
 #define  BLOCK_DIM_X 32
 #define  BLOCK_DIM_Y 32
@@ -69,7 +70,27 @@ __global__ void diag(float *matrix,float *array1, float* array2,int n) {
   matrix[idx*n+idx] = array1[idx]*array2[idx];
 }
 
+void inverseMatrix(float* A_device,float* A_inverse_device,int n,cusolverDnHandle_t cusolverH)
+{
 
+  int *d_Ipiv = NULL; // pivot indices
+  int *d_info = NULL; // error info
+  int lwork = 0; // size of workspace
+  float *d_work = NULL; // device workspace for getrf
+  int dev = 0;
+  cudaDeviceProp deviceProp;
+  cudaSetDevice(dev);
+  cudaGetDeviceProperties(&deviceProp, dev);
+  printf("Device %d: %s\n", dev, deviceProp.name);
+cudaMallocManaged(&d_Ipiv, sizeof(int)*n);
+cudaMallocManaged(&d_info, sizeof(int));
+  cusolverDnSgetrf_bufferSize(cusolverH, n, n, A_device, n, &lwork);
+  cudaMallocManaged(&d_work, sizeof(float)*lwork);
+  cusolverDnSgetrf(cusolverH, n, n, A_device, n, d_work, d_Ipiv, d_info);
+  cusolverDnSgetrs(cusolverH,CUBLAS_OP_N,n,n,A_device,
+				     n, d_Ipiv, A_inverse_device, // This should be the identity matrix
+				      n,  d_info);
+}
 int main() {
 
   int cols=32;
@@ -167,7 +188,8 @@ int main() {
   */
   ///////////////////////////////////////
   int iter=0;
-
+  cusolverDnHandle_t cusolverH = NULL;
+  cusolverDnCreate(&cusolverH);
     while(iter < 10) {
     //line 29
     //w_q = (-X * mu_beta - off)
@@ -186,19 +208,28 @@ int main() {
     float k=3.0;
     line30<<<numBlocks_array_rows, threadsPerBlock>>>(mu_g_device,y_device,w_q_device,k);
     float* diagonalMatrix;
-    CUDA_CHECK(   cudaMalloc((void**)&diagonalMatrix, cols*cols * sizeof(float)) );
+       cudaMalloc((void**)&diagonalMatrix, cols*cols * sizeof(float)) ;
     //line 31
     //    Zigma = (X.transpose() * (mu_g.array() * w_q.array()).matrix().asDiagonal() * X).inverse();
     diag<<<numBlocks_array_rows,threadsPerBlock,1>>>(diagonalMatrix,mu_g_device,w_q_device,rows);
 
-    cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, rows, cols, cols, 1.0, X, cols, diagonalMatrix, cols, 0.0, Zigma_device, cols);
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, rows, cols, cols, 1.0, Zigma_device, cols, X, cols, 0.0, diagonalMatrix, cols);
+    cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, rows, cols, cols, &alpha, X_device, cols, diagonalMatrix, cols, &beta, Zigma_device, cols);
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, rows, cols, cols, &alpha, Zigma_device, cols, X_device, cols, &beta, diagonalMatrix, cols);
 
     float* tmp;
     tmp=Zigma_device;
     Zigma_device=diagonalMatrix;
-    diagoanlMatrix=tmp;
-    inverseMatrix(diagonalMatrix,)
+    diagonalMatrix=tmp;
+    inverseMatrix(diagonalMatrix,Zigma_device,cols,cusolverH);
+    //Now we have Zigma_inverse !!!!
+    //finalize, check on convergenze and done !!!!!
+    //delta = Zigma * (k * X.transpose() * (mu_g.array() * w_q.array() - 1).matrix());
+    //mu_beta += delta;
+    //converged = delta.cwiseAbs().maxCoeff() < eps;
+    //iter++;
+    
+    
+      
     iter++;
   }
     
