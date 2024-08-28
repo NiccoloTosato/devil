@@ -13,7 +13,7 @@ LIBS = $(INSTALL_DIR)/lib/libBETA_FIT.so
 all: $(LIBS) 
 
 $(LIBS):
-	cmake -H../RACES/ -B$(BUILD_DIR)
+	cmake -H../devil-cuda/ -B$(BUILD_DIR)
 	mkdir $(BUILD_DIR)
 	cmake --build $(BUILD_DIR) 
 	cp $(INSTALL_DIR)/lib/*RACES.a $(LIBS)
