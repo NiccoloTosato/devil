@@ -13,6 +13,7 @@ LIBS = $(INSTALL_DIR)/lib/libBETA_FIT.so
 all: $(LIBS) 
 
 $(LIBS):
+	cmake .
 	mkdir $(BUILD_DIR)
 	cmake --build $(BUILD_DIR) 
 	cp $(INSTALL_DIR)/lib/*RACES.a $(LIBS)
