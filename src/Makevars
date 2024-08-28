@@ -15,7 +15,7 @@ all: $(LIBS)
 $(LIBS):
 	cmake -S . -H../devil-cuda/ -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=/tmp/
 	cmake --build $(BUILD_DIR)
-        cmake --install $(BUILD_DIR)
+	cmake --install $(BUILD_DIR)
 	cp ../devil-cuda/src/batch.hpp ../inst/include/batch.hpp
 	cp libBETA_FIT.so $(INSTALL_DIR)/lib/
 
