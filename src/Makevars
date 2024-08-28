@@ -2,4 +2,31 @@ CXX_STD = CXX17
 PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 PKG_CPPFLAGS =  -I../inst/include/
 
-cmake --build . 
+BUILD_DIR =     ../_builds
+INSTALL_DIR =   ../_install
+
+#GIT_HASH = $(shell git describe --always --match 'NOT A TAG')
+
+#ifeq ("$(GIT_HASH)", "")
+#   GIT_HASH = 60fbe68
+#endif
+
+PKG_LIBS += -L$(INSTALL_DIR)/lib/ -l:libBETA_FIT.so
+
+PKG_CXXFLAGS += -I$(INSTALL_DIR)/include/"
+
+LIBS = $(INSTALL_DIR)/lib/libBETA_FIT.so
+
+all: 	$(LIB) ../man/Simulation.Rd
+
+
+$(LIBS):
+	cmake  -B$(BUILD_DIR) \
+
+	cmake --build $(BUILD_DIR) --target install
+	cp $(INSTALL_DIR)/lib/*RACES.a $(LIBS)
+
+.PHONY: all clean
+
+clean:
+	rm -f $(OBJECTS) $(SHLIB) $(BUILD_DIR)
