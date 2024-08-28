@@ -15,7 +15,6 @@ all: $(LIBS)
 $(LIBS):
 	cmake -H../devil-cuda/ -B$(BUILD_DIR)
 	cmake --build $(BUILD_DIR) 
-	ls
 	cp ../devil-cuda/src/batch.hpp ../inst/include/batch.hpp
 	cp libBETA_FIT.so $(INSTALL_DIR)/lib/
 
