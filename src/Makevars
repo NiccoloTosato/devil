@@ -7,7 +7,7 @@ BUILD_DIR = ../_builds
 INSTALL_DIR = ../_install
 
 PKG_LIBS += -L$(INSTALL_DIR)/lib/ -lBETA_FIT
-PKG_CXXFLAGS += -I$(INSTALL_DIR)/include/ 
+PKG_CXXFLAGS += -I$(INSTALL_DIR)/include/
 
 LIBBETA = $(INSTALL_DIR)/lib/libBETA_FIT.so
 
@@ -18,8 +18,9 @@ $(LIBBETA):
 	cmake -S . -H../devil-cuda/ -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR)
 	cmake --build $(BUILD_DIR)
 	cmake --install $(BUILD_DIR)
-	ls  $(INSTALL_DIR)/lib/
-	#cp $(INSTALL_DIR)/lib/*FIT.a $(LIBBETA)
+	#ls  $(INSTALL_DIR)/lib/
+	#cat $(INSTALL_DIR)/include/batch.hpp
+	cp $(INSTALL_DIR)/lib/*FIT.a $(LIBBETA)
 .PHONY: all clean
 
 clean:

@@ -57,8 +57,10 @@ Eigen::MatrixXf X_float = X.cast<float>();
 Eigen::MatrixXf mu_beta_float = mu_beta.cast<float>();
 Eigen::MatrixXf off_float = off.cast<float>();
 Eigen::VectorXf k_float = k.cast<float>();
-// beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k_float,
-// 1,1);
+ std::cout<<"Start GPU" << std::endl;
+ beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k_float, 1,
+                       1);
+  std::cout<<"END GPU" << std::endl;
 //  Return both mu_beta and Zigma as a List
  hello();
   return  mu_beta;

@@ -139,7 +139,7 @@ fit_devil <- function(
     l_beta0 <- rbind(beta_0, extra_beta_0)
     l_dispersion_init <- c(dispersion_init, extra_dispersion_init)
 
-    stop("beta_fit_gpu not yet implemented")
+    #stop("beta_fit_gpu not yet implemented")
     beta <- beta_fit_gpu(l_input_mat, design_matrix, l_beta0, l_offset_matrix, l_dispersion_init, max_iter = max_iter, eps = tolerance, batch_size = batch_size)
     beta <- beta[1:ngenes,]
 
