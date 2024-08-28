@@ -1,24 +1,25 @@
 CXX_STD = CXX17
-PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
-PKG_CPPFLAGS =  -I../inst/include/
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -L/u/area/ntosato/.local/lib/cutensor/ -L$(CUDA_HOME)/lib64  -lcutensor -lcuda -lcudart -lcusolver
+PKG_CPPFLAGS =   -Wno-ignored-attributes
 SHELL := /bin/bash
 
 BUILD_DIR = ../_builds
 INSTALL_DIR = ../_install
-PKG_LIBS += -L$(INSTALL_DIR)/lib/ -l:libBETA_FIT.so
-PKG_CXXFLAGS += -I$(INSTALL_DIR)/include/
 
-LIBS = $(INSTALL_DIR)/lib/libBETA_FIT.so
+PKG_LIBS += -L$(INSTALL_DIR)/lib/ -lBETA_FIT
+PKG_CXXFLAGS += -I$(INSTALL_DIR)/include/ 
 
-all: $(LIBS) 
+LIBBETA = $(INSTALL_DIR)/lib/libBETA_FIT.so
 
-$(LIBS):
-	cmake -S . -H../devil-cuda/ -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=/tmp/
+all: $(LIBBETA) 
+
+$(LIBBETA):
+	#ls ../devil-cuda/src/
+	cmake -S . -H../devil-cuda/ -B$(BUILD_DIR) -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR)
 	cmake --build $(BUILD_DIR)
 	cmake --install $(BUILD_DIR)
-	cp ../devil-cuda/src/batch.hpp ../inst/include/batch.hpp
-	cp libBETA_FIT.so $(INSTALL_DIR)/lib/
-
+	ls  $(INSTALL_DIR)/lib/
+	#cp $(INSTALL_DIR)/lib/*FIT.a $(LIBBETA)
 .PHONY: all clean
 
 clean:

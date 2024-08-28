@@ -1,7 +1,17 @@
 #include <RcppEigen.h>
 #include <iostream>
-
+#include "batch.hpp"
 // [[Rcpp::depends(RcppEigen)]]
+#include <Eigen/Dense>
+/*
+void beta_fit_gpu_external(Eigen::MatrixXf Y_host, Eigen::MatrixXf X_host,
+                           Eigen::MatrixXf mu_beta_host,
+                           Eigen::MatrixXf offset_host, Eigen::VectorXf k_host,
+                           int max_iter, float eps);
+
+void hello();
+*/
+
 
 using namespace Rcpp;
 using namespace Eigen;
@@ -34,9 +44,24 @@ List beta_fit(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd mu_beta, Eig
     converged = delta.cwiseAbs().maxCoeff() < eps;
     iter++;
   }
-
+  // hello();
   // Return both mu_beta and Zigma as a List
   return List::create(Named("mu_beta") = mu_beta, Named("iter") = iter);
+}
+
+// [[Rcpp::export]]
+Eigen::MatrixXd  beta_fit_gpu(Eigen::MatrixXd y, Eigen::MatrixXd X, Eigen::MatrixXd mu_beta, Eigen::MatrixXd off, Eigen::VectorXd k, int max_iter, float eps,int batch_size) {
+  
+Eigen::MatrixXf y_float = y.cast<float>();
+Eigen::MatrixXf X_float = X.cast<float>();
+Eigen::MatrixXf mu_beta_float = mu_beta.cast<float>();
+Eigen::MatrixXf off_float = off.cast<float>();
+Eigen::VectorXf k_float = k.cast<float>();
+// beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k_float,
+// 1,1);
+//  Return both mu_beta and Zigma as a List
+ hello();
+  return  mu_beta;
 }
 
 // [[Rcpp::export]]
