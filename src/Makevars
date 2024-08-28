@@ -4,7 +4,7 @@ PKG_CPPFLAGS =  -I../inst/include/
 
 BUILD_DIR =     ../_builds
 INSTALL_DIR =   ../_install
-
+mkdir $BUILD_DIR
 
 PKG_LIBS += -L$(INSTALL_DIR)/lib/ -l:libBETA_FIT.so
 
