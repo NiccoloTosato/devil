@@ -50,7 +50,7 @@ List beta_fit(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd mu_beta, Eig
 }
 
 // [[Rcpp::export]]
-Eigen::MatrixXd  beta_fit_gpu(Eigen::MatrixXd y, Eigen::MatrixXd X, Eigen::MatrixXd mu_beta, Eigen::MatrixXd off, Eigen::VectorXd k, int max_iter, float eps,int batch_size) {
+Eigen::MatrixXf  beta_fit_gpu(Eigen::MatrixXd y, Eigen::MatrixXd X, Eigen::MatrixXd mu_beta, Eigen::MatrixXd off, Eigen::VectorXd k, int max_iter, float eps,int batch_size) {
   
 Eigen::MatrixXf y_float = y.cast<float>();
 Eigen::MatrixXf X_float = X.cast<float>();
@@ -58,12 +58,12 @@ Eigen::MatrixXf mu_beta_float = mu_beta.cast<float>();
 Eigen::MatrixXf off_float = off.cast<float>();
 Eigen::VectorXf k_float = k.cast<float>();
  std::cout<<"Start GPU" << std::endl;
- beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k_float, 1,
-                       1);
+auto result= beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k_float, batch_size,
+                       eps);
   std::cout<<"END GPU" << std::endl;
 //  Return both mu_beta and Zigma as a List
- hello();
-  return  mu_beta;
+
+  return  result;
 }
 
 // [[Rcpp::export]]

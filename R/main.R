@@ -142,7 +142,7 @@ fit_devil <- function(
     #stop("beta_fit_gpu not yet implemented")
     beta <- beta_fit_gpu(l_input_mat, design_matrix, l_beta0, l_offset_matrix, l_dispersion_init, max_iter = max_iter, eps = tolerance, batch_size = batch_size)
     beta <- beta[1:ngenes,]
-
+    iterations=1
     # tmp <- parallel::mclapply(1:(ngenes+extra_genes), function(i) {
     #   devil:::beta_fit(l_input_mat[i,], design_matrix, l_beta0[i,], l_offset_matrix[i,], l_dispersion_init[i], max_iter = max_iter, eps = tolerance)
     #   #devil:::beta_fit(input_mat[i,], design_matrix, beta_0[i,], offset_matrix[i,], 1, max_iter = max_iter, eps = tolerance)
