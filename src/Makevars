@@ -1,19 +1,19 @@
 CXX_STD = CXX17
 PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 PKG_CPPFLAGS =  -I../inst/include/
+SHELL := /bin/bash
 
 BUILD_DIR =     ../_builds
 INSTALL_DIR =   ../_install
-mkdir $BUILD_DIR
-
 PKG_LIBS += -L$(INSTALL_DIR)/lib/ -l:libBETA_FIT.so
-
 PKG_CXXFLAGS += -I$(INSTALL_DIR)/include/"
 
 LIBS = $(INSTALL_DIR)/lib/libBETA_FIT.so
 
-all:	$(LIBS) 
+all: prepare $(LIBS) 
 
+prepare:
+	mkdir $BUILD_DIR 
 $(LIBS):
 	cmake --build $(BUILD_DIR) 
 	cp $(INSTALL_DIR)/lib/*RACES.a $(LIBS)
