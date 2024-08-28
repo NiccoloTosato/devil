@@ -15,7 +15,7 @@ all: $(LIBS)
 $(LIBS):
 	cmake -H../devil-cuda/ -B$(BUILD_DIR)
 	cmake --build $(BUILD_DIR) 
-	cp $(INSTALL_DIR)/lib/*RACES.a $(LIBS)
+	#cp $(INSTALL_DIR)/lib/*BETA* $(LIBS)
 
 .PHONY: all clean
 
