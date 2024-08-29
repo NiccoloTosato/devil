@@ -52,17 +52,19 @@ List beta_fit(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd mu_beta, Eig
 // [[Rcpp::export]]
 Eigen::MatrixXf  beta_fit_gpu(Eigen::MatrixXd y, Eigen::MatrixXd X, Eigen::MatrixXd mu_beta, Eigen::MatrixXd off, Eigen::VectorXd k, int max_iter, float eps,int batch_size) {
   
-Eigen::MatrixXf y_float = y.cast<float>();
-Eigen::MatrixXf X_float = X.cast<float>();
-Eigen::MatrixXf mu_beta_float = mu_beta.cast<float>();
-Eigen::MatrixXf off_float = off.cast<float>();
+Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> y_float = y.cast<float>();
+Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> X_float = X.cast<float>();
+Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> mu_beta_float = mu_beta.cast<float>();
+Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> off_float = off.cast<float>();
 Eigen::VectorXf k_float = k.cast<float>();
- std::cout<<"Start GPU" << std::endl;
-auto result= beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k_float, batch_size,
-                       eps);
-  std::cout<<"END GPU" << std::endl;
-//  Return both mu_beta and Zigma as a List
-
+ 
+ std::cout<<"Start GPU" <<"Iteration " << max_iter << " EPS " << eps << " batch_size" << std::endl;
+ //need to change the signature of gpu_external, to accomodate row-major data, not column-major.
+ auto result= beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k_float, batch_size,
+				    eps,batch_size);
+ //Eigen::Matrix<float, result.rows(), result.cols(), Eigen::RowMajor> resultr =result;
+ std::cout<<"END GPU" << std::endl;
+ //  Return both mu_beta and Zigma as a List
   return  result;
 }
 

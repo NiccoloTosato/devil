@@ -113,20 +113,18 @@ fit_devil <- function(
   if (CUDA & CUDA_is_available) {
     message("Messing with CUDA! Implementation still needed")
 
-    if (batch_size > ngenes) {
-      message("Lowering batch size because of too few genes")
-      batch_size <- 2^floor(log2(ngenes))
-    } else if (batch_size != 2^floor(log2(batch_size))) {
-      message("Converting batch size to closest power of two")
-      batch_sizes <- c(2^floor(log2(batch_size)), 2^ceiling(log2(batch_size)))
-      batch_sizes <- batch_sizes[batch_sizes <= ngenes]
-      batch_size <- batch_sizes[which.min(abs(batch_sizes - batch_size))]
-    }
-
-
+    #if (batch_size > ngenes) {
+    #  message("Lowering batch size because of too few genes")
+    #  batch_size <- 2^floor(log2(ngenes))
+    #} else if (batch_size != 2^floor(log2(batch_size))) {
+    #  message("Converting batch size to closest power of two")
+    #  batch_sizes <- c(2^floor(log2(batch_size)), 2^ceiling(log2(batch_size)))
+    #  batch_sizes <- batch_sizes[batch_sizes <= ngenes]
+    #  batch_size <- batch_sizes[which.min(abs(batch_sizes - batch_size))]
+    #}
 
     remainder = ngenes %% batch_size
-    extra_genes = batch_size - remainder
+    extra_genes =  remainder
 
     extra_input_mat <- matrix(exp(.1), nrow = extra_genes, ncol = ncol(input_mat))
     extra_offset_mat <- matrix(1, nrow = extra_genes, ncol = ncol(input_mat))
@@ -141,7 +139,7 @@ fit_devil <- function(
 
     #stop("beta_fit_gpu not yet implemented")
     beta <- beta_fit_gpu(l_input_mat, design_matrix, l_beta0, l_offset_matrix, l_dispersion_init, max_iter = max_iter, eps = tolerance, batch_size = batch_size)
-    beta <- beta[1:ngenes,]
+    #beta <- beta[1:ngenes,]
     iterations=1
     # tmp <- parallel::mclapply(1:(ngenes+extra_genes), function(i) {
     #   devil:::beta_fit(l_input_mat[i,], design_matrix, l_beta0[i,], l_offset_matrix[i,], l_dispersion_init[i], max_iter = max_iter, eps = tolerance)
