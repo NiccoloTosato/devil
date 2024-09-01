@@ -136,9 +136,14 @@ fit_devil <- function(
     l_offset_matrix <- rbind(offset_matrix, extra_offset_mat)
     l_beta0 <- rbind(beta_0, extra_beta_0)
     l_dispersion_init <- c(dispersion_init, extra_dispersion_init)
-
+    message("Fit beta CUDA")
     #stop("beta_fit_gpu not yet implemented")
+    	  start_time <- Sys.time()
     beta <- beta_fit_gpu(l_input_mat, design_matrix, l_beta0, l_offset_matrix, l_dispersion_init, max_iter = max_iter, eps = tolerance, batch_size = batch_size)
+	end_time <- Sys.time()
+message("BETA GPU RUNTIME:")
+message(as.numeric(difftime(end_time, start_time, units = "secs")))
+    
     #beta <- beta[1:ngenes,]
     iterations=1
     # tmp <- parallel::mclapply(1:(ngenes+extra_genes), function(i) {
@@ -149,6 +154,7 @@ fit_devil <- function(
     # beta <- beta[1:ngenes,]
 
   } else {
+	  start_time <- Sys.time()
     if (verbose) { message("Fit beta coefficients") }
     tmp <- parallel::mclapply(1:ngenes, function(i) {
       devil:::beta_fit(input_mat[i,], design_matrix, beta_0[i,], offset_matrix[i,], dispersion_init[i], max_iter = max_iter, eps = tolerance)
@@ -192,6 +198,9 @@ fit_devil <- function(
 
     beta <- lapply(1:ngenes, function(i) { tmp[[i]]$mu_beta }) %>% do.call("rbind", .)
     rownames(beta) <- gene_names
+	end_time <- Sys.time()
+message("BETA CPU RUNTIME:")
+message(as.numeric(difftime(end_time, start_time, units = "secs")))
     # if (!(is.null(groups))) {
     #   first_occurence_in_groups <- match(unique(groups), groups)
     #   beta <- t(solve(design_matrix[first_occurence_in_groups, ,drop=FALSE], t(beta)))

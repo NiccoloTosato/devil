@@ -1,16 +1,9 @@
 #include <RcppEigen.h>
 #include <iostream>
 #include "batch.hpp"
+#include <chrono>
 // [[Rcpp::depends(RcppEigen)]]
 #include <Eigen/Dense>
-/*
-void beta_fit_gpu_external(Eigen::MatrixXf Y_host, Eigen::MatrixXf X_host,
-                           Eigen::MatrixXf mu_beta_host,
-                           Eigen::MatrixXf offset_host, Eigen::VectorXf k_host,
-                           int max_iter, float eps);
-
-void hello();
-*/
 
 
 using namespace Rcpp;
@@ -27,6 +20,7 @@ List beta_fit(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd mu_beta, Eig
   int cols = X.cols();
   int rows = X.rows();
   k = 1.0 / k;
+  
   Eigen::VectorXd delta = Eigen::VectorXd::Zero(cols);
   Eigen::MatrixXd inv_sigma_beta_const = 0.01 * Eigen::MatrixXd::Identity(cols, cols);
   Eigen::MatrixXd Zigma = Eigen::MatrixXd::Identity(cols, cols);
@@ -44,24 +38,33 @@ List beta_fit(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd mu_beta, Eig
     converged = delta.cwiseAbs().maxCoeff() < eps;
     iter++;
   }
-  // hello();
   // Return both mu_beta and Zigma as a List
   return List::create(Named("mu_beta") = mu_beta, Named("iter") = iter);
 }
 
 // [[Rcpp::export]]
-Eigen::MatrixXf  beta_fit_gpu(Eigen::MatrixXd y, Eigen::MatrixXd X, Eigen::MatrixXd mu_beta, Eigen::MatrixXd off, Eigen::VectorXd k, int max_iter, float eps,int batch_size) {
+Eigen::MatrixXf  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::MatrixXf mu_beta, Eigen::MatrixXf off, Eigen::VectorXf k, int max_iter, float eps,int batch_size) {
+  auto t1 = std::chrono::high_resolution_clock::now();
+  auto y_float = y.transpose();
+  auto X_float = X.transpose();
+  auto mu_beta_float = mu_beta.transpose(); 
+  auto off_float = off.transpose();
+  auto t2 = std::chrono::high_resolution_clock::now();
+  auto elapsed{t2-t1};
+  std::cout << "TIME Reorder cost " << std::chrono::duration<double, std::milli>(elapsed).count()
+            << " ms" << std::endl;
   
-Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> y_float = y.cast<float>();
-Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> X_float = X.cast<float>();
-Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> mu_beta_float = mu_beta.cast<float>();
-Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> off_float = off.cast<float>();
-Eigen::VectorXf k_float = k.cast<float>();
- 
  std::cout<<"Start GPU" <<"Iteration " << max_iter << " EPS " << eps << " batch_size" << std::endl;
  //need to change the signature of gpu_external, to accomodate row-major data, not column-major.
- auto result= beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k_float, batch_size,
+ t1 = std::chrono::high_resolution_clock::now();
+
+ auto result= beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k, batch_size,
 				    eps,batch_size);
+  t2  =std::chrono::high_resolution_clock::now();
+  elapsed= t2-t1;
+  std::cout << "TIME: Compute cost " << std::chrono::duration<double, std::milli>(elapsed).count() << " ms"
+            << std::endl;
+
  //Eigen::Matrix<float, result.rows(), result.cols(), Eigen::RowMajor> resultr =result;
  std::cout<<"END GPU" << std::endl;
  //  Return both mu_beta and Zigma as a List
