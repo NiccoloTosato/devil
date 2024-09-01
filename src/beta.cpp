@@ -68,7 +68,7 @@ Eigen::MatrixXf  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::Matri
  //Eigen::Matrix<float, result.rows(), result.cols(), Eigen::RowMajor> resultr =result;
  std::cout<<"END GPU" << std::endl;
  //  Return both mu_beta and Zigma as a List
-  return  result;
+ return  result.transpose();
 }
 
 // [[Rcpp::export]]
