@@ -43,7 +43,7 @@ List beta_fit(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd mu_beta, Eig
 }
 
 // [[Rcpp::export]]
-Eigen::MatrixXf  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::MatrixXf mu_beta, Eigen::MatrixXf off, Eigen::VectorXf k, int max_iter, float eps,int batch_size) {
+Eigen::MatrixXd  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::MatrixXf mu_beta, Eigen::MatrixXf off, Eigen::VectorXf k, int max_iter, float eps,int batch_size) {
   auto t1 = std::chrono::high_resolution_clock::now();
   auto y_float = y.transpose();
   auto X_float = X.transpose();
@@ -68,7 +68,7 @@ Eigen::MatrixXf  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::Matri
  //Eigen::Matrix<float, result.rows(), result.cols(), Eigen::RowMajor> resultr =result;
  std::cout<<"END GPU" << std::endl;
  //  Return both mu_beta and Zigma as a List
- return  result.transpose();
+ return  result.transpose().cast<double>();
 }
 
 // [[Rcpp::export]]
