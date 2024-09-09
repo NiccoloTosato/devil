@@ -62,7 +62,7 @@ List  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::MatrixXf mu_beta
  //need to change the signature of gpu_external, to accomodate row-major data, not column-major.
  t1 = std::chrono::high_resolution_clock::now();
  //create iteration vector, pass by reference. 
- auto result= beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k, batch_size,
+ auto result= beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k, max_iter,
 				    eps,batch_size,iterations);
   t2  =std::chrono::high_resolution_clock::now();
   elapsed= t2-t1;
