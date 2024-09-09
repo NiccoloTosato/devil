@@ -43,7 +43,7 @@ List beta_fit(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd mu_beta, Eig
 }
 
 // [[Rcpp::export]]
-Eigen::MatrixXd  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::MatrixXf mu_beta, Eigen::MatrixXf off, Eigen::VectorXf k, int max_iter, float eps,int batch_size) {
+List  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::MatrixXf mu_beta, Eigen::MatrixXf off, Eigen::VectorXf k, int max_iter, float eps,int batch_size) {
   auto t1 = std::chrono::high_resolution_clock::now();
   auto y_float = y.transpose();
   auto X_float = X.transpose();
@@ -53,11 +53,15 @@ Eigen::MatrixXd  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::Matri
   auto elapsed{t2-t1};
   std::cout << "TIME Reorder cost " << std::chrono::duration<double, std::milli>(elapsed).count()
             << " ms" << std::endl;
+
+  std::cout << "Start GPU"
+            << "Iteration " << max_iter << " EPS " << eps << " batch_size"
+            << std::endl;
+  std::vector<int> iterations(y.rows());
   
- std::cout<<"Start GPU" <<"Iteration " << max_iter << " EPS " << eps << " batch_size" << std::endl;
  //need to change the signature of gpu_external, to accomodate row-major data, not column-major.
  t1 = std::chrono::high_resolution_clock::now();
-
+ //create iteration vector, pass by reference. 
  auto result= beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k, batch_size,
 				    eps,batch_size);
   t2  =std::chrono::high_resolution_clock::now();
@@ -68,7 +72,9 @@ Eigen::MatrixXd  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::Matri
  //Eigen::Matrix<float, result.rows(), result.cols(), Eigen::RowMajor> resultr =result;
  std::cout<<"END GPU" << std::endl;
  //  Return both mu_beta and Zigma as a List
- return  result.transpose().cast<double>();
+ auto resultD = result.transpose().cast<double>();
+ return List::create(Named("mu_beta") = resultD, Named("iter") = iterations);
+ 
 }
 
 // [[Rcpp::export]]
