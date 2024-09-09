@@ -139,13 +139,13 @@ fit_devil <- function(
     message("Fit beta CUDA")
     #stop("beta_fit_gpu not yet implemented")
     	  start_time <- Sys.time()
-beta <- beta_fit_gpu(l_input_mat, design_matrix, l_beta0, l_offset_matrix, l_dispersion_init, max_iter = max_iter, eps = tolerance, batch_size = batch_size)
+    result <- beta_fit_gpu(l_input_mat, design_matrix, l_beta0, l_offset_matrix, l_dispersion_init, max_iter = max_iter, eps = tolerance, batch_size = batch_size)
 	end_time <- Sys.time()
 message("BETA GPU RUNTIME:")
 message(as.numeric(difftime(end_time, start_time, units = "secs")))
     
-    #beta <- beta[1:ngenes,]
-    iterations=1
+    beta <- result$mu_beta
+    iterations <-result$iter
     # tmp <- parallel::mclapply(1:(ngenes+extra_genes), function(i) {
     #   devil:::beta_fit(l_input_mat[i,], design_matrix, l_beta0[i,], l_offset_matrix[i,], l_dispersion_init[i], max_iter = max_iter, eps = tolerance)
     #   #devil:::beta_fit(input_mat[i,], design_matrix, beta_0[i,], offset_matrix[i,], 1, max_iter = max_iter, eps = tolerance)
