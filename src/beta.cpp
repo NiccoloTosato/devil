@@ -63,7 +63,7 @@ List  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::MatrixXf mu_beta
  t1 = std::chrono::high_resolution_clock::now();
  //create iteration vector, pass by reference. 
  auto result= beta_fit_gpu_external(y_float, X_float, mu_beta_float, off_float, k, batch_size,
-				    eps,batch_size);
+				    eps,batch_size,iterations);
   t2  =std::chrono::high_resolution_clock::now();
   elapsed= t2-t1;
   std::cout << "TIME: Compute cost " << std::chrono::duration<double, std::milli>(elapsed).count() << " ms"
@@ -72,8 +72,8 @@ List  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::MatrixXf mu_beta
  //Eigen::Matrix<float, result.rows(), result.cols(), Eigen::RowMajor> resultr =result;
  std::cout<<"END GPU" << std::endl;
  //  Return both mu_beta and Zigma as a List
- auto resultD = result.transpose().cast<double>();
- return List::create(Named("mu_beta") = resultD, Named("iter") = iterations);
+
+ return List::create(Named("mu_beta") = result.cast<double>().transpose(), Named("iter") = iterations);
  
 }
 
