@@ -7,7 +7,7 @@ which cmake
 if [ ! -d RACES ]; then
 
     git clone https://github.com/NiccoloTosato/devil-cuda.git
-    (cd devil-cuda; git checkout libraries && rm -rf .git )
+    (cd devil-cuda; git checkout low-memory && rm -rf .git )
 
 fi
 
