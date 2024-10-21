@@ -1,5 +1,5 @@
 CXX_STD = CXX17
-PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -L/u/area/ntosato/.local/lib/cutensor/ -L$(CUDA_HOME)/lib64 -L/usr/local/cuda-12.2/lib64/  -lcutensor -lcuda -lcudart -lcusolver 
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -L$(CUDA_HOME)/lib64 -L/orfeo/cephfs/opt/programs/intel/almalinux9/cutensor/2.0.2.5/lib -L/usr/local/cuda-12.2/lib64 -lcutensor -lcuda -lcudart -lcusolver -lcublas
 PKG_CPPFLAGS =   -Wno-ignored-attributes
 SHELL := /bin/bash
 
