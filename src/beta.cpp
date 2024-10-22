@@ -45,10 +45,10 @@ List beta_fit(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd mu_beta, Eig
 // [[Rcpp::export]]
 List  beta_fit_gpu(Eigen::MatrixXf y, Eigen::MatrixXf X, Eigen::MatrixXf mu_beta, Eigen::MatrixXf off, Eigen::VectorXf k, int max_iter, float eps,int batch_size) {
   auto t1 = std::chrono::high_resolution_clock::now();
-  auto y_float = y.transpose();
-  auto X_float = X.transpose();
-  auto mu_beta_float = mu_beta.transpose(); 
-  auto off_float = off.transpose();
+  auto y_float = y.transpose().eval();
+  auto X_float = X.transpose().eval();
+  auto mu_beta_float = mu_beta.transpose().eval(); 
+  auto off_float = off.transpose().eval();
   auto t2 = std::chrono::high_resolution_clock::now();
   auto elapsed{t2-t1};
   std::cout << "TIME Reorder cost " << std::chrono::duration<double, std::milli>(elapsed).count()
