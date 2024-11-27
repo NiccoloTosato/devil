@@ -6,7 +6,7 @@ SHELL := /bin/bash
 BUILD_DIR = ../_builds
 INSTALL_DIR = ../_install
 
-PKG_LIBS += -L$(INSTALL_DIR)/lib64/ -lBETA_FIT
+PKG_LIBS += -L$(INSTALL_DIR)/lib/ -lBETA_FIT
 PKG_CXXFLAGS += -I$(INSTALL_DIR)/include/
 
 LIBBETA = $(INSTALL_DIR)/lib/libBETA_FIT.so
