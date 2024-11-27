@@ -9,7 +9,7 @@ INSTALL_DIR = ../_install
 PKG_LIBS += -L$(INSTALL_DIR)/lib64/ -lBETA_FIT
 PKG_CXXFLAGS += -I$(INSTALL_DIR)/include/
 
-LIBBETA = $(INSTALL_DIR)/lib64/libBETA_FIT.so
+LIBBETA = $(INSTALL_DIR)/lib/libBETA_FIT.so
 
 all: $(LIBBETA) 
 
