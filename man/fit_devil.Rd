@@ -8,12 +8,12 @@ fit_devil(
   input_matrix,
   design_matrix,
   overdispersion = TRUE,
-  offset = 0,
+  init_overdispersion = TRUE,
+  offset = 1e-06,
   size_factors = TRUE,
   verbose = FALSE,
-  max_iter = 500,
+  max_iter = 200,
   tolerance = 0.001,
-  eps = 1e-06,
   CUDA = FALSE,
   batch_size = 1024L,
   parallel.cores = NULL
@@ -26,7 +26,7 @@ fit_devil(
 
 \item{overdispersion}{Logical value indicating whether to estimate the overdispersion parameter. (default is \code{TRUE})}
 
-\item{offset}{A numeric vector to be included as an offset in the model. (default is \code{0})}
+\item{offset}{A numeric vector to be included as an offset in the model. Can be used to avoid issues with non-invertible matrices.(default is \code{0})}
 
 \item{size_factors}{Logical value indicating whether to compute size factors for normalization. (default is \code{TRUE})}
 
@@ -35,8 +35,6 @@ fit_devil(
 \item{max_iter}{Integer specifying the maximum number of iterations allowed for the optimization process. (default is \code{500})}
 
 \item{tolerance}{Numeric value indicating the tolerance level for the convergence criterion. (default is \code{1e-3})}
-
-\item{eps}{A small numeric value added to \code{input_matrix} to avoid issues with non-invertible matrices. (default is \code{1e-6})}
 
 \item{CUDA}{Logical value indicating whether to use GPU version of the code (default is \code{FALSE})}
 
